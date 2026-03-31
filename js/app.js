@@ -1,14 +1,5 @@
-/* ═══════════════════════════════════════════════
-   FixZone — Frontend JavaScript
-   Handles: loader, navbar, animations, form, stats
-   ═══════════════════════════════════════════════ */
-
-// ── API Configuration ──
 const API_BASE = 'http://localhost:8080/api';
-
-// ── CONFIG WHATSAPP ──
-const WHATSAPP_NUMBER = '573009626009'; // <-- CAMBIA AQUÍ TU NÚMERO
-
+const WHATSAPP_NUMBER = '573017505646';
 document.addEventListener('DOMContentLoaded', () => {
     initLoader();
     initNavbar();
@@ -17,17 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
     initForm();
 });
 
-/* ═══════════ LOADER ═══════════ */
 function initLoader() {
     const loader = document.getElementById('loader');
     window.addEventListener('load', () => {
         setTimeout(() => loader.classList.add('hidden'), 800);
     });
-    // Fallback
     setTimeout(() => loader.classList.add('hidden'), 3000);
 }
 
-/* ═══════════ NAVBAR ═══════════ */
+
 function initNavbar() {
     const navbar = document.getElementById('navbar');
     const hamburger = document.getElementById('hamburger');
@@ -63,8 +52,6 @@ function initNavbar() {
         });
     });
 }
-
-/* ═══════════ SCROLL ANIMATIONS ═══════════ */
 function initScrollAnimations() {
     const elements = document.querySelectorAll(
         '.service-card, .console-item, .process-step, .testimonial-card, .info-card'
@@ -83,8 +70,6 @@ function initScrollAnimations() {
 
     elements.forEach(el => observer.observe(el));
 }
-
-/* ═══════════ ANIMATED COUNTERS ═══════════ */
 function initCounters() {
     const counters = document.querySelectorAll('.stat-number');
 
@@ -120,8 +105,6 @@ function animateCounter(el) {
 
     requestAnimationFrame(update);
 }
-
-/* ═══════════ CONTACT FORM ═══════════ */
 function initForm() {
     const form = document.getElementById('repairForm');
     const message = document.getElementById('formMessage');
@@ -141,8 +124,6 @@ function initForm() {
             consola: form.consola.value,
             problema: form.problema.value.trim()
         };
-
-        // ── MENSAJE WHATSAPP ──
         const mensajeWA = encodeURIComponent(
 `Hola, quiero solicitar una reparación:
 
@@ -156,7 +137,6 @@ function initForm() {
         const whatsappURL = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${mensajeWA}`;
 
         try {
-            // Intentar enviar al backend
             const response = await fetch(`${API_BASE}/reparaciones`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -174,11 +154,10 @@ function initForm() {
 
             form.reset();
 
-            // 🔥 ABRIR WHATSAPP TAMBIÉN
+
             window.open(whatsappURL, '_blank');
 
         } catch (error) {
-            // Si falla backend → SOLO WHATSAPP
             message.className = 'form-message success';
             message.textContent = 'Redirigiendo a WhatsApp...';
 
@@ -198,7 +177,6 @@ function initForm() {
     });
 }
 
-/* ═══════════ SMOOTH SCROLL POLYFILL ═══════════ */
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         const target = document.querySelector(this.getAttribute('href'));
