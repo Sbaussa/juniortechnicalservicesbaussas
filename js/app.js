@@ -6,6 +6,9 @@
 // ── API Configuration ──
 const API_BASE = 'http://localhost:8080/api';
 
+// ── CONFIG WHATSAPP ──
+const WHATSAPP_NUMBER = '573009626009'; // <-- CAMBIA AQUÍ TU NÚMERO
+
 document.addEventListener('DOMContentLoaded', () => {
     initLoader();
     initNavbar();
@@ -30,18 +33,15 @@ function initNavbar() {
     const hamburger = document.getElementById('hamburger');
     const navLinks = document.getElementById('navLinks');
 
-    // Scroll effect
     window.addEventListener('scroll', () => {
         navbar.classList.toggle('scrolled', window.scrollY > 50);
     });
 
-    // Mobile menu
     hamburger.addEventListener('click', () => {
         hamburger.classList.toggle('active');
         navLinks.classList.toggle('open');
     });
 
-    // Close menu on link click
     navLinks.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
             hamburger.classList.remove('active');
@@ -49,7 +49,6 @@ function initNavbar() {
         });
     });
 
-    // Active link highlight
     const sections = document.querySelectorAll('section[id]');
     window.addEventListener('scroll', () => {
         const scrollY = window.scrollY + 100;
@@ -109,7 +108,6 @@ function animateCounter(el) {
     function update(now) {
         const elapsed = now - start;
         const progress = Math.min(elapsed / duration, 1);
-        // Ease out cubic
         const eased = 1 - Math.pow(1 - progress, 3);
         el.textContent = Math.floor(eased * target);
 
@@ -144,7 +142,21 @@ function initForm() {
             problema: form.problema.value.trim()
         };
 
+        // ── MENSAJE WHATSAPP ──
+        const mensajeWA = encodeURIComponent(
+`Hola, quiero solicitar una reparación:
+
+👤 Nombre: ${formData.nombre}
+📱 Teléfono: ${formData.telefono}
+📧 Correo: ${formData.email}
+🎮 Servicio: ${formData.consola}
+🛠️ Problema: ${formData.problema}`
+        );
+
+        const whatsappURL = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${mensajeWA}`;
+
         try {
+            // Intentar enviar al backend
             const response = await fetch(`${API_BASE}/reparaciones`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -152,26 +164,29 @@ function initForm() {
             });
 
             if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error || 'Error al enviar la solicitud');
+                throw new Error('Backend no disponible');
             }
 
             const data = await response.json();
 
             message.className = 'form-message success';
-            message.textContent = `¡Solicitud enviada! Tu código es: ${data.codigo}. Te contactaremos pronto.`;
+            message.textContent = `¡Solicitud enviada! Código: ${data.codigo}`;
+
             form.reset();
 
+            // 🔥 ABRIR WHATSAPP TAMBIÉN
+            window.open(whatsappURL, '_blank');
+
         } catch (error) {
-            // If backend is offline, show friendly message
-            if (error.message === 'Failed to fetch') {
-                message.className = 'form-message success';
-                message.textContent = '¡Solicitud registrada! Te contactaremos pronto por WhatsApp.';
-                form.reset();
-            } else {
-                message.className = 'form-message error';
-                message.textContent = error.message;
-            }
+            // Si falla backend → SOLO WHATSAPP
+            message.className = 'form-message success';
+            message.textContent = 'Redirigiendo a WhatsApp...';
+
+            form.reset();
+
+            setTimeout(() => {
+                window.open(whatsappURL, '_blank');
+            }, 800);
         } finally {
             btn.innerHTML = originalText;
             btn.disabled = false;
